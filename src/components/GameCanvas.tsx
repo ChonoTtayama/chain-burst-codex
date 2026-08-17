@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { getCanvasMetrics } from '../game/canvasMetrics'
 import { GameEngine } from '../game/engine'
 import { renderGame } from '../game/renderer'
 import type { GamePhase } from '../game/types'
@@ -28,7 +29,7 @@ export function GameCanvas({ onChainChange, onPhaseChange, onLaunch }: GameCanva
     let lastPhase: GamePhase | undefined
     let width = 1
     let height = 1
-    let pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
+    let pixelRatio = 1
 
     const notify = () => {
       const snapshot = engineRef.current!.getSnapshot()
@@ -50,11 +51,12 @@ export function GameCanvas({ onChainChange, onPhaseChange, onLaunch }: GameCanva
 
     const resize = () => {
       const bounds = canvas.getBoundingClientRect()
-      width = Math.max(1, bounds.width)
-      height = Math.max(1, bounds.height)
-      pixelRatio = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width = Math.round(width * pixelRatio)
-      canvas.height = Math.round(height * pixelRatio)
+      const metrics = getCanvasMetrics(bounds.width, bounds.height, window.devicePixelRatio)
+      width = metrics.width
+      height = metrics.height
+      pixelRatio = metrics.pixelRatio
+      canvas.width = metrics.backingWidth
+      canvas.height = metrics.backingHeight
 
       if (engineRef.current) {
         engineRef.current.resize(width, height)
@@ -91,6 +93,8 @@ export function GameCanvas({ onChainChange, onPhaseChange, onLaunch }: GameCanva
 
     const resizeObserver = new ResizeObserver(resize)
     resizeObserver.observe(canvas)
+    if (canvas.parentElement) resizeObserver.observe(canvas.parentElement)
+    window.visualViewport?.addEventListener('resize', resize)
     canvas.addEventListener('pointerdown', handlePointerDown)
     resize()
     notify()
@@ -99,6 +103,7 @@ export function GameCanvas({ onChainChange, onPhaseChange, onLaunch }: GameCanva
     return () => {
       cancelAnimationFrame(animationFrame)
       resizeObserver.disconnect()
+      window.visualViewport?.removeEventListener('resize', resize)
       canvas.removeEventListener('pointerdown', handlePointerDown)
       engineRef.current = null
     }

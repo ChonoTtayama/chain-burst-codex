@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GameCanvas } from '../components/GameCanvas'
 import { GAME_CONFIG } from '../game/config'
+import { CHAIN_FX_THRESHOLDS, getChainVisualTier } from '../game/chainFx'
 import type { GamePhase } from '../game/types'
 import { readGameStats, recordBestChain, recordPlay, type GameStats } from '../storage/gameStats'
 
@@ -12,9 +13,18 @@ export function GamePage() {
   const [chain, setChain] = useState(0)
   const [stats, setStats] = useState<GameStats>(() => readGameStats())
   const [newBest, setNewBest] = useState(false)
+  const [overdriveBurst, setOverdriveBurst] = useState(0)
   const bestAtRoundStart = useRef(stats.bestChain)
+  const previousChainRef = useRef(0)
 
   const handleChainChange = useCallback((nextChain: number) => {
+    if (
+      nextChain >= CHAIN_FX_THRESHOLDS.overdrive
+      && previousChainRef.current < CHAIN_FX_THRESHOLDS.overdrive
+    ) {
+      setOverdriveBurst((value) => value + 1)
+    }
+    previousChainRef.current = nextChain
     setChain(nextChain)
     if (nextChain > bestAtRoundStart.current) {
       setNewBest(true)
@@ -29,12 +39,24 @@ export function GamePage() {
   const retry = () => {
     const latestStats = readGameStats()
     bestAtRoundStart.current = latestStats.bestChain
+    previousChainRef.current = 0
     setStats(latestStats)
     setChain(0)
     setNewBest(false)
+    setOverdriveBurst(0)
     setPhase('ready')
     setRound((value) => value + 1)
   }
+
+  const chainTier = getChainVisualTier(chain)
+  const isOverdrive = chainTier === 'overdrive'
+  const chainStatus = isOverdrive
+    ? 'OVERDRIVE MODE'
+    : chainTier === 'surge'
+      ? 'CHAIN SURGE'
+      : chainTier === 'rising'
+        ? 'CHAIN RISING'
+        : 'CHAIN REACTING'
 
   return (
     <main className="game-page shell">
@@ -43,9 +65,9 @@ export function GamePage() {
           CHAIN <span>BURST</span>
         </button>
         <div className="scoreboard" aria-live="polite">
-          <div className="score-item score-current">
-            <span>CHAIN</span>
-            <strong>{chain}<small> / {GAME_CONFIG.ballCount}</small></strong>
+          <div className={`score-item score-current chain-tier-${chainTier}`}>
+            <span>{isOverdrive ? 'OVERDRIVE' : 'CHAIN'}</span>
+            <strong className="chain-value" key={chain}>{chain}<small> / {GAME_CONFIG.ballCount}</small></strong>
           </div>
           <div className="score-item">
             <span>BEST</span>
@@ -54,8 +76,20 @@ export function GamePage() {
         </div>
       </header>
 
-      <section className="game-stage" aria-label="ゲーム画面">
+      <section className={`game-stage stage-tier-${chainTier}`} aria-label="ゲーム画面">
         <GameCanvas key={round} onChainChange={handleChainChange} onPhaseChange={setPhase} onLaunch={handleLaunch} />
+        {phase === 'chain' && chain > 0 && (
+          <div key={`chain-streak-${chain}`} className={`chain-streak chain-tier-${chainTier}`} aria-live="polite">
+            <span>{chainStatus}</span>
+            <strong><b>{chain}</b><small> CHAIN</small></strong>
+          </div>
+        )}
+        {phase === 'chain' && isOverdrive && overdriveBurst > 0 && (
+          <div key={`overdrive-${overdriveBurst}`} className="overdrive-alert" aria-hidden="true">
+            <span>10+ CHAIN</span>
+            <strong>OVERDRIVE</strong>
+          </div>
+        )}
         {phase === 'ready' && (
           <div className="stage-message ready-message" aria-live="polite">
             <span>CLICK / TAP ANYWHERE</span>
