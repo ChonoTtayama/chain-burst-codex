@@ -573,3 +573,115 @@ h1 span, .brand-button span { color: #76e9ff; }
     min-height: 320px;
   }
 }
+
+/* Round 3: title and archive UI */
+.title-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.history-button { min-width: min(100%, 150px); }
+
+.history-page {
+  display: grid;
+  place-items: center;
+}
+
+.history-card {
+  position: relative;
+  width: min(100%, 760px);
+  overflow: hidden;
+  padding: clamp(30px, 6vw, 58px);
+  border: 1px solid rgba(142, 223, 255, 0.23);
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(18, 37, 78, 0.93), rgba(17, 14, 53, 0.9));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.history-card::before {
+  position: absolute;
+  top: -155px;
+  right: -105px;
+  width: 240px;
+  height: 240px;
+  border: 22px solid rgba(99, 225, 255, 0.1);
+  border-radius: 50%;
+  box-shadow: 0 0 0 34px rgba(99, 225, 255, 0.025);
+  content: "";
+  pointer-events: none;
+}
+
+.history-card h1 {
+  margin-top: 12px;
+  font-size: clamp(2.9rem, 9vw, 5.2rem);
+  letter-spacing: -0.075em;
+}
+
+.history-back {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  margin-bottom: clamp(25px, 4vw, 40px);
+  color: #9ddfff;
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+}
+
+.history-back:hover { color: #f2fdff; }
+.history-back:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.history-lede { position: relative; z-index: 1; margin: 0; color: #c7d4ee; line-height: 1.7; }
+
+.history-summary {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: clamp(24px, 4vw, 34px) 0 0;
+  overflow: hidden;
+  border: 1px solid rgba(154, 193, 239, 0.18);
+  border-radius: 12px;
+  background: rgba(154, 193, 239, 0.18);
+}
+
+.history-summary div { min-width: 0; padding: 16px 14px; background: rgba(6, 13, 35, 0.58); }
+.history-summary dt { color: #9db0d0; font-size: 0.59rem; font-weight: 850; letter-spacing: 0.09em; }
+.history-summary dd { margin: 7px 0 0; color: #f6fbff; font-size: clamp(1.35rem, 4vw, 2rem); font-weight: 850; line-height: 1; }
+.history-summary div:first-child dd { color: #7ceaff; }
+
+.history-list-panel {
+  position: relative;
+  z-index: 1;
+  margin-top: clamp(20px, 4vw, 32px);
+  padding: 17px;
+  border: 1px solid rgba(142, 223, 255, 0.16);
+  border-radius: 14px;
+  background: rgba(5, 13, 35, 0.45);
+}
+
+.history-list-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.history-list-header > span { color: #9db0d0; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.08em; }
+.history-list { display: grid; gap: 7px; margin: 14px 0 0; padding: 0; list-style: none; }
+.history-list li { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: baseline; gap: 10px; min-height: 40px; padding: 8px 10px; border-left: 2px solid rgba(107, 223, 255, 0.45); background: rgba(13, 30, 67, 0.58); }
+.history-list li:first-child { border-left-color: #7ceaff; background: linear-gradient(90deg, rgba(38, 104, 150, 0.48), rgba(13, 30, 67, 0.58)); }
+.history-rank { color: #9db0d0; font-size: 0.69rem; font-weight: 850; letter-spacing: 0.08em; }
+.history-list strong { color: #eefbff; font-size: 1.4rem; line-height: 1; }
+.history-chain-label { color: #8fadd3; font-size: 0.62rem; font-weight: 850; letter-spacing: 0.1em; }
+.history-empty { margin: 0; padding: 36px 18px; color: #a8bcdb; font-size: 0.9rem; line-height: 1.8; text-align: center; }
+.history-title-button { position: relative; z-index: 1; width: min(100%, 190px); margin-top: 20px; }
+
+@media (max-width: 560px) {
+  .title-actions { display: grid; grid-template-columns: 1fr; }
+  .title-actions .button { width: 100%; }
+  .history-card { padding: 25px 20px; border-radius: 19px; }
+  .history-summary { grid-template-columns: 1fr; }
+  .history-summary div { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 15px; }
+  .history-summary dd { margin: 0; }
+  .history-list-panel { padding: 14px; }
+  .history-list li { grid-template-columns: 42px minmax(0, 1fr) auto; }
+}

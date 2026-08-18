@@ -4,7 +4,13 @@ import { GameCanvas } from '../components/GameCanvas'
 import { GAME_CONFIG } from '../game/config'
 import { CHAIN_FX_THRESHOLDS, getChainVisualTier } from '../game/chainFx'
 import type { GamePhase } from '../game/types'
-import { readGameStats, recordBestChain, recordPlay, type GameStats } from '../storage/gameStats'
+import {
+  readGameStats,
+  recordBestChain,
+  recordCompletedPlay,
+  recordPlay,
+  type GameStats,
+} from '../storage/gameStats'
 
 export function GamePage() {
   const navigate = useNavigate()
@@ -16,6 +22,8 @@ export function GamePage() {
   const [overdriveBurst, setOverdriveBurst] = useState(0)
   const bestAtRoundStart = useRef(stats.bestChain)
   const previousChainRef = useRef(0)
+  const chainRef = useRef(0)
+  const resultRecordedRef = useRef(false)
 
   const handleChainChange = useCallback((nextChain: number) => {
     if (
@@ -25,10 +33,19 @@ export function GamePage() {
       setOverdriveBurst((value) => value + 1)
     }
     previousChainRef.current = nextChain
+    chainRef.current = nextChain
     setChain(nextChain)
     if (nextChain > bestAtRoundStart.current) {
       setNewBest(true)
       setStats(recordBestChain(nextChain))
+    }
+  }, [])
+
+  const handlePhaseChange = useCallback((nextPhase: GamePhase) => {
+    setPhase(nextPhase)
+    if (nextPhase === 'result' && !resultRecordedRef.current) {
+      resultRecordedRef.current = true
+      setStats(recordCompletedPlay(chainRef.current))
     }
   }, [])
 
@@ -40,6 +57,8 @@ export function GamePage() {
     const latestStats = readGameStats()
     bestAtRoundStart.current = latestStats.bestChain
     previousChainRef.current = 0
+    chainRef.current = 0
+    resultRecordedRef.current = false
     setStats(latestStats)
     setChain(0)
     setNewBest(false)
@@ -77,7 +96,7 @@ export function GamePage() {
       </header>
 
       <section className={`game-stage stage-tier-${chainTier}`} aria-label="ゲーム画面">
-        <GameCanvas key={round} onChainChange={handleChainChange} onPhaseChange={setPhase} onLaunch={handleLaunch} />
+        <GameCanvas key={round} onChainChange={handleChainChange} onPhaseChange={handlePhaseChange} onLaunch={handleLaunch} />
         {phase === 'chain' && chain > 0 && (
           <div key={`chain-streak-${chain}`} className={`chain-streak chain-tier-${chainTier}`} aria-live="polite">
             <span>{chainStatus}</span>
