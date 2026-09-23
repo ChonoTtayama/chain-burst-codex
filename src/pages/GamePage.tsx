@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GameCanvas } from '../components/GameCanvas'
 import { CHAIN_FX_THRESHOLDS, getChainVisualTier } from '../game/chainFx'
@@ -18,14 +18,16 @@ export function GamePage() {
   const [phase, setPhase] = useState<GamePhase>('ready')
   const [chain, setChain] = useState(0)
   const [stats, setStats] = useState<GameStats>(() => readGameStats())
-  const [settings] = useState<GameSettings>(() => readGameSettings())
+  // Settings are captured for the current visit. A later visit to /game reads
+  // the latest saved preferences, while retries keep their current round rules.
+  const [roundSettings] = useState<GameSettings>(() => readGameSettings())
   const [newBest, setNewBest] = useState(false)
   const [overdriveBurst, setOverdriveBurst] = useState(0)
   const bestAtRoundStart = useRef(stats.bestChain)
   const previousChainRef = useRef(0)
   const chainRef = useRef(0)
   const resultRecordedRef = useRef(false)
-  const gameConfig = getGameConfig(settings)
+  const gameConfig = useMemo(() => getGameConfig(roundSettings), [roundSettings])
 
   const handleChainChange = useCallback((nextChain: number) => {
     if (
@@ -80,7 +82,7 @@ export function GamePage() {
         : 'CHAIN REACTING'
 
   return (
-    <main className={`game-page shell effect-${settings.effect}`}>
+    <main className={`game-page shell effect-${roundSettings.effect}`}>
       <header className="game-header">
         <button className="brand-button" type="button" onClick={() => navigate('/')} aria-label="タイトル画面へ戻る">
           CHAIN <span>BURST</span>
@@ -101,7 +103,7 @@ export function GamePage() {
         <GameCanvas
           key={round}
           gameConfig={gameConfig}
-          effect={settings.effect}
+          effect={roundSettings.effect}
           onChainChange={handleChainChange}
           onPhaseChange={handlePhaseChange}
           onLaunch={handleLaunch}

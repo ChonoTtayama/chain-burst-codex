@@ -22,6 +22,3 @@ export interface GameConfig {
   explosionHoldMs: number
   explosionShrinkMs: number
 }
-
-export const EXPLOSION_TOTAL_MS =
-  GAME_CONFIG.explosionExpandMs + GAME_CONFIG.explosionHoldMs + GAME_CONFIG.explosionShrinkMs

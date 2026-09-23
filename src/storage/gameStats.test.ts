@@ -24,6 +24,15 @@ describe('game stats storage', () => {
     expect(readGameStats()).toEqual({ bestChain: 8, playCount: 3, recentChains: [] })
   })
 
+  it('normalizes malformed persisted scores before the history UI uses them', () => {
+    window.localStorage.setItem(
+      GAME_STATS_KEY,
+      JSON.stringify({ bestChain: 8.9, playCount: -2, recentChains: [8.9, -1, '7', null, 4] }),
+    )
+
+    expect(readGameStats()).toEqual({ bestChain: 8, playCount: 0, recentChains: [8, 4] })
+  })
+
   it('persists play count and the best chain without lowering the record', () => {
     writeGameStats({ bestChain: 4, playCount: 2, recentChains: [4, 1] })
     expect(recordPlay()).toEqual({ bestChain: 4, playCount: 3, recentChains: [4, 1] })

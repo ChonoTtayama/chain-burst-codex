@@ -111,7 +111,7 @@ export function GameCanvas({ gameConfig, effect, onChainChange, onPhaseChange, o
       canvas.removeEventListener('pointerdown', handlePointerDown)
       engineRef.current = null
     }
-  }, [])
+  }, [effect, gameConfig])
 
   return <canvas className="game-canvas" ref={canvasRef} aria-label="CHAIN BURST game field" />
 }

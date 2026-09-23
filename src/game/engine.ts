@@ -1,4 +1,4 @@
-import { EXPLOSION_TOTAL_MS, GAME_CONFIG, type GameConfig } from './config'
+import { GAME_CONFIG, type GameConfig } from './config'
 import type { Ball, Explosion, GamePhase, GameSnapshot } from './types'
 
 export interface GameEngineOptions {
@@ -191,5 +191,3 @@ export class GameEngine {
     return min + this.random() * (max - min)
   }
 }
-
-export { EXPLOSION_TOTAL_MS }

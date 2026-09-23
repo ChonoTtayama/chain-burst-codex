@@ -1,3 +1,5 @@
+import { readStoredJson, writeStoredJson } from './jsonStorage'
+
 export interface GameStats {
   bestChain: number
   playCount: number
@@ -10,7 +12,7 @@ export const HISTORY_LIMIT = 10
 const emptyStats = (): GameStats => ({ bestChain: 0, playCount: 0, recentChains: [] })
 
 function normalizeScore(value: unknown): number | null {
-  return Number.isFinite(value) && typeof value === 'number' && value >= 0 ? Math.floor(value) : null
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? Math.floor(value) : null
 }
 
 function normalizeHistory(value: unknown): number[] {
@@ -32,21 +34,11 @@ function normalize(value: unknown): GameStats {
 }
 
 export function readGameStats(): GameStats {
-  try {
-    return normalize(JSON.parse(window.localStorage.getItem(GAME_STATS_KEY) ?? 'null'))
-  } catch {
-    return emptyStats()
-  }
+  return readStoredJson(GAME_STATS_KEY, normalize)
 }
 
 export function writeGameStats(stats: GameStats): GameStats {
-  const normalized = normalize(stats)
-  try {
-    window.localStorage.setItem(GAME_STATS_KEY, JSON.stringify(normalized))
-  } catch {
-    // The game remains playable when storage is unavailable (for example, private browsing restrictions).
-  }
-  return normalized
+  return writeStoredJson(GAME_STATS_KEY, stats, normalize)
 }
 
 export function recordPlay(): GameStats {

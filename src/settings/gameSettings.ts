@@ -1,4 +1,5 @@
 import { GAME_CONFIG, type GameConfig } from '../game/config'
+import { readStoredJson, writeStoredJson } from '../storage/jsonStorage'
 
 export const BALL_COUNT_OPTIONS = [20, 30, 40] as const
 export const BALL_SPEED_OPTIONS = ['slow', 'normal', 'fast'] as const
@@ -44,21 +45,11 @@ function normalize(value: unknown): GameSettings {
 }
 
 export function readGameSettings(): GameSettings {
-  try {
-    return normalize(JSON.parse(window.localStorage.getItem(GAME_SETTINGS_KEY) ?? 'null'))
-  } catch {
-    return { ...DEFAULT_GAME_SETTINGS }
-  }
+  return readStoredJson(GAME_SETTINGS_KEY, normalize)
 }
 
 export function writeGameSettings(settings: GameSettings): GameSettings {
-  const normalized = normalize(settings)
-  try {
-    window.localStorage.setItem(GAME_SETTINGS_KEY, JSON.stringify(normalized))
-  } catch {
-    // The game remains playable when storage is unavailable (for example, private browsing restrictions).
-  }
-  return normalized
+  return writeStoredJson(GAME_SETTINGS_KEY, settings, normalize)
 }
 
 /** Builds the per-round engine configuration from persisted player preferences. */
