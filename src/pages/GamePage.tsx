@@ -1,9 +1,9 @@
 import { useCallback, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GameCanvas } from '../components/GameCanvas'
-import { GAME_CONFIG } from '../game/config'
 import { CHAIN_FX_THRESHOLDS, getChainVisualTier } from '../game/chainFx'
 import type { GamePhase } from '../game/types'
+import { getGameConfig, readGameSettings, type GameSettings } from '../settings/gameSettings'
 import {
   readGameStats,
   recordBestChain,
@@ -18,12 +18,14 @@ export function GamePage() {
   const [phase, setPhase] = useState<GamePhase>('ready')
   const [chain, setChain] = useState(0)
   const [stats, setStats] = useState<GameStats>(() => readGameStats())
+  const [settings] = useState<GameSettings>(() => readGameSettings())
   const [newBest, setNewBest] = useState(false)
   const [overdriveBurst, setOverdriveBurst] = useState(0)
   const bestAtRoundStart = useRef(stats.bestChain)
   const previousChainRef = useRef(0)
   const chainRef = useRef(0)
   const resultRecordedRef = useRef(false)
+  const gameConfig = getGameConfig(settings)
 
   const handleChainChange = useCallback((nextChain: number) => {
     if (
@@ -78,7 +80,7 @@ export function GamePage() {
         : 'CHAIN REACTING'
 
   return (
-    <main className="game-page shell">
+    <main className={`game-page shell effect-${settings.effect}`}>
       <header className="game-header">
         <button className="brand-button" type="button" onClick={() => navigate('/')} aria-label="タイトル画面へ戻る">
           CHAIN <span>BURST</span>
@@ -86,7 +88,7 @@ export function GamePage() {
         <div className="scoreboard" aria-live="polite">
           <div className={`score-item score-current chain-tier-${chainTier}`}>
             <span>{isOverdrive ? 'OVERDRIVE' : 'CHAIN'}</span>
-            <strong className="chain-value" key={chain}>{chain}<small> / {GAME_CONFIG.ballCount}</small></strong>
+            <strong className="chain-value" key={chain}>{chain}<small> / {gameConfig.ballCount}</small></strong>
           </div>
           <div className="score-item">
             <span>BEST</span>
@@ -96,7 +98,14 @@ export function GamePage() {
       </header>
 
       <section className={`game-stage stage-tier-${chainTier}`} aria-label="ゲーム画面">
-        <GameCanvas key={round} onChainChange={handleChainChange} onPhaseChange={handlePhaseChange} onLaunch={handleLaunch} />
+        <GameCanvas
+          key={round}
+          gameConfig={gameConfig}
+          effect={settings.effect}
+          onChainChange={handleChainChange}
+          onPhaseChange={handlePhaseChange}
+          onLaunch={handleLaunch}
+        />
         {phase === 'chain' && chain > 0 && (
           <div key={`chain-streak-${chain}`} className={`chain-streak chain-tier-${chainTier}`} aria-live="polite">
             <span>{chainStatus}</span>
@@ -118,7 +127,7 @@ export function GamePage() {
         {phase === 'result' && (
           <div className="result-panel" role="status">
             <p className="eyebrow">RESULT</p>
-            <p className="result-chain">CHAIN <strong>{chain}</strong><small> / {GAME_CONFIG.ballCount}</small></p>
+            <p className="result-chain">CHAIN <strong>{chain}</strong><small> / {gameConfig.ballCount}</small></p>
             {newBest && <p className="new-best">NEW BEST!</p>}
             <div className="result-actions">
               <button className="button button-primary" type="button" onClick={retry}>RETRY <span aria-hidden="true">↻</span></button>

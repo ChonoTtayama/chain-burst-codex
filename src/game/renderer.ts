@@ -1,6 +1,7 @@
 import { getChainVisualTier, type ChainVisualTier } from './chainFx'
 import type { GameEngine } from './engine'
 import type { GameSnapshot } from './types'
+import type { EffectLevel } from '../settings/gameSettings'
 
 const TIER_STYLES: Record<ChainVisualTier, { auraScale: number; glowScale: number; lineWidth: number; innerRing: boolean }> = {
   base: { auraScale: 1, glowScale: 1, lineWidth: 2, innerRing: false },
@@ -16,6 +17,7 @@ export function renderGame(
   devicePixelRatio: number,
   engine: GameEngine,
   snapshot: GameSnapshot,
+  effect: EffectLevel,
 ): void {
   context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0)
   context.clearRect(0, 0, width, height)
@@ -31,18 +33,20 @@ export function renderGame(
 
   const visualTier = getChainVisualTier(snapshot.chain)
   const tierStyle = TIER_STYLES[visualTier]
+  const isReducedEffect = effect === 'reduced'
 
   for (const explosion of snapshot.explosions) {
     const radius = engine.getExplosionRadius(explosion)
     if (radius <= 0) continue
     const color = getExplosionColor(explosion.kind, visualTier)
-    const alpha = Math.min(0.84, (0.22 + radius / 120) * tierStyle.glowScale)
-    const auraRadius = radius * tierStyle.auraScale
-    const lifePulse = 1 + Math.sin(explosion.ageMs / 74) * 0.07
+    const effectScale = isReducedEffect ? 0.52 : 1
+    const alpha = Math.min(0.84, (0.22 + radius / 120) * (1 + (tierStyle.glowScale - 1) * effectScale))
+    const auraRadius = radius * (1 + (tierStyle.auraScale - 1) * effectScale)
+    const lifePulse = isReducedEffect ? 1 : 1 + Math.sin(explosion.ageMs / 74) * 0.07
 
     const glow = context.createRadialGradient(explosion.x, explosion.y, 0, explosion.x, explosion.y, auraRadius)
-    glow.addColorStop(0, `rgba(${color}, ${alpha * 0.56})`)
-    glow.addColorStop(0.68, `rgba(${color}, ${alpha * 0.17})`)
+    glow.addColorStop(0, `rgba(${color}, ${alpha * (isReducedEffect ? 0.42 : 0.56)})`)
+    glow.addColorStop(0.68, `rgba(${color}, ${alpha * (isReducedEffect ? 0.12 : 0.17)})`)
     glow.addColorStop(1, `rgba(${color}, 0)`)
     context.fillStyle = glow
     context.beginPath()
@@ -55,7 +59,7 @@ export function renderGame(
     context.arc(explosion.x, explosion.y, Math.max(1, radius - 1), 0, Math.PI * 2)
     context.stroke()
 
-    if (tierStyle.innerRing) {
+    if (tierStyle.innerRing && !isReducedEffect) {
       context.strokeStyle = `rgba(${color}, ${alpha * 0.48})`
       context.lineWidth = Math.max(1, tierStyle.lineWidth * 0.48)
       context.beginPath()
@@ -63,7 +67,7 @@ export function renderGame(
       context.stroke()
     }
 
-    if (visualTier === 'overdrive' && explosion.ageMs <= 640) {
+    if (visualTier === 'overdrive' && explosion.ageMs <= 640 && !isReducedEffect) {
       drawOverdriveRays(context, explosion.x, explosion.y, radius, auraRadius, color, alpha)
     }
   }

@@ -23,6 +23,7 @@ export function TitlePage() {
         <div className="title-actions">
           <Link className="button button-primary start-button" to="/game">START <span aria-hidden="true">→</span></Link>
           <Link className="button button-secondary history-button" to="/history">HISTORY</Link>
+          <Link className="button button-secondary settings-button" to="/settings">SETTINGS</Link>
         </div>
 
         <dl className="stats-grid">

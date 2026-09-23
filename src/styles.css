@@ -685,3 +685,117 @@ h1 span, .brand-button span { color: #76e9ff; }
   .history-list-panel { padding: 14px; }
   .history-list li { grid-template-columns: 42px minmax(0, 1fr) auto; }
 }
+
+/* Round 4: settings screen and reduced-effects treatment */
+.settings-button { min-width: min(100%, 150px); }
+
+.settings-page {
+  display: grid;
+  place-items: center;
+}
+
+.settings-card {
+  position: relative;
+  width: min(100%, 760px);
+  overflow: hidden;
+  padding: clamp(30px, 6vw, 58px);
+  border: 1px solid rgba(142, 223, 255, 0.23);
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(18, 37, 78, 0.93), rgba(17, 14, 53, 0.9));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.settings-card::before {
+  position: absolute;
+  top: -150px;
+  right: -96px;
+  width: 230px;
+  height: 230px;
+  border: 22px solid rgba(173, 106, 255, 0.1);
+  border-radius: 50%;
+  box-shadow: 0 0 0 34px rgba(99, 225, 255, 0.025);
+  content: "";
+  pointer-events: none;
+}
+
+.settings-card h1 {
+  margin-top: 12px;
+  font-size: clamp(2.75rem, 8.5vw, 5rem);
+  letter-spacing: -0.075em;
+}
+
+.settings-lede { position: relative; z-index: 1; margin: 0; color: #c7d4ee; line-height: 1.7; }
+
+.setting-group {
+  position: relative;
+  z-index: 1;
+  margin-top: clamp(24px, 4vw, 32px);
+}
+
+.setting-group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.setting-group-heading > span {
+  color: #93e7ff;
+  font-size: 0.69rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.setting-options {
+  display: grid;
+  gap: 8px;
+  margin-top: 11px;
+}
+
+.setting-options-three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.setting-options-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.setting-option {
+  min-height: 52px;
+  border: 1px solid rgba(137, 185, 237, 0.26);
+  border-radius: 9px;
+  color: #aebfdd;
+  background: rgba(7, 19, 48, 0.64);
+  font-size: 0.73rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  transition: transform 140ms ease, border-color 140ms ease, color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+.setting-option:hover { transform: translateY(-1px); border-color: rgba(124, 234, 255, 0.62); color: #effdff; }
+.setting-option:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.setting-option.is-selected {
+  border-color: rgba(124, 234, 255, 0.84);
+  color: #e8fcff;
+  background: linear-gradient(135deg, rgba(31, 101, 142, 0.9), rgba(33, 55, 113, 0.9));
+  box-shadow: inset 0 -2px 0 rgba(125, 234, 255, 0.7), 0 0 18px rgba(72, 211, 255, 0.15);
+}
+
+.setting-description { margin: 10px 0 0; color: #9db0d0; font-size: 0.74rem; line-height: 1.65; }
+.settings-saved { position: relative; z-index: 1; margin: 27px 0 0; color: #88e8ff; font-size: 0.62rem; font-weight: 900; letter-spacing: 0.16em; }
+.settings-title-button { position: relative; z-index: 1; width: min(100%, 190px); margin-top: 12px; }
+
+/* REDUCED leaves the score readable but removes the strongest Round 2 flashes and HUD pulses. */
+.effect-reduced .score-current.chain-tier-overdrive,
+.effect-reduced .stage-tier-overdrive::after { animation: none; }
+.effect-reduced .score-current.chain-tier-overdrive { box-shadow: inset 0 -2px 0 rgba(255, 213, 90, 0.55); }
+.effect-reduced .stage-tier-overdrive::after { box-shadow: inset 0 0 22px rgba(244, 121, 255, 0.06); }
+.effect-reduced .chain-value,
+.effect-reduced .chain-streak strong { animation: none; }
+.effect-reduced .chain-streak::before,
+.effect-reduced .chain-streak::after,
+.effect-reduced .overdrive-alert { display: none; }
+.effect-reduced .chain-streak strong b { text-shadow: 2px 2px 0 rgba(4, 20, 58, 0.44); }
+.effect-reduced .chain-streak.chain-tier-surge strong b { text-shadow: 2px 2px 0 rgba(17, 20, 68, 0.5); }
+.effect-reduced .chain-streak.chain-tier-overdrive strong b { text-shadow: 2px 2px 0 rgba(66, 15, 69, 0.5); }
+
+@media (max-width: 560px) {
+  .settings-card { padding: 25px 20px; border-radius: 19px; }
+  .setting-option { min-height: 50px; font-size: 0.67rem; }
+  .setting-description { font-size: 0.7rem; }
+}

@@ -1,16 +1,20 @@
 import { useEffect, useRef } from 'react'
 import { getCanvasMetrics } from '../game/canvasMetrics'
+import type { GameConfig } from '../game/config'
 import { GameEngine } from '../game/engine'
 import { renderGame } from '../game/renderer'
 import type { GamePhase } from '../game/types'
+import type { EffectLevel } from '../settings/gameSettings'
 
 interface GameCanvasProps {
+  gameConfig: GameConfig
+  effect: EffectLevel
   onChainChange: (chain: number) => void
   onPhaseChange: (phase: GamePhase) => void
   onLaunch: () => void
 }
 
-export function GameCanvas({ onChainChange, onPhaseChange, onLaunch }: GameCanvasProps) {
+export function GameCanvas({ gameConfig, effect, onChainChange, onPhaseChange, onLaunch }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const engineRef = useRef<GameEngine | null>(null)
   const callbacksRef = useRef({ onChainChange, onPhaseChange, onLaunch })
@@ -46,7 +50,7 @@ export function GameCanvas({ onChainChange, onPhaseChange, onLaunch }: GameCanva
     const draw = () => {
       const engine = engineRef.current
       if (!engine) return
-      renderGame(context, width, height, pixelRatio, engine, engine.getSnapshot())
+      renderGame(context, width, height, pixelRatio, engine, engine.getSnapshot(), effect)
     }
 
     const resize = () => {
@@ -61,7 +65,7 @@ export function GameCanvas({ onChainChange, onPhaseChange, onLaunch }: GameCanva
       if (engineRef.current) {
         engineRef.current.resize(width, height)
       } else {
-        engineRef.current = new GameEngine({ width, height })
+        engineRef.current = new GameEngine({ width, height, config: gameConfig })
       }
       draw()
     }
